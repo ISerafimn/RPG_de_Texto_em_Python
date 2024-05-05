@@ -12,7 +12,7 @@ def titulo(msg):
 
 
 def ganhar_item(): #gera um item dentro da lista de itens
-    itens = [{'banana': 'restaura a vida'}, {'maça': 'desativa a gravidade'}, {'espinafre': 'aumenta a força'}]
+    itens = [{'Banana': 'Restaura 20 de Vida'}, {'Maça': 'Restaura 40 de Vida'}, {'Espinafre': 'Aumenta 1 de Força'}]
     bolsa.append(itens[randint(0, 2)])
     return bolsa[-1]
 
@@ -35,6 +35,7 @@ def exibir_ficha_mob(mob_atual): #exibe a ficha do mob
     for keys in mob_atual.keys():
         print(f'\033[34m{keys}:\033[m {mob_atual[keys]}')
     linha()
+    sleep(2)
 
 
 def gerar_mob(lv_base=3, lv_max=10): #gera um mob
@@ -42,6 +43,24 @@ def gerar_mob(lv_base=3, lv_max=10): #gera um mob
     return {'nome': 'monstro', 'lv': 1 * lv_mob, 'hp': 10 * lv_mob, 'hpm': 10 * lv_mob, 'dmg': 1 * lv_mob,
             'spd': 0.75 * lv_mob, 'exp': 8 * lv_mob}
 
+
+def ganhar_exp(ficha_mob):
+    ficha_base['exp'] += ficha_mob['exp']
+    print(f'\033[34m{ficha_mob["exp"]} de Experiência ganha!\033[m'.center(48))
+    if ficha_base['exp'] > ficha_base['expm']:
+        ficha_base['exp'] = ficha_base['exp'] - ficha_base['exp']
+        linha()
+        ficha_base['lv'] += 1
+        upar()
+        print(f'\033[1;33mVocê passou de Nível {ficha_base["lv"] - 1} -> {ficha_base["lv"]}\033[m'.center(48))
+        ficha_base['expm'] += (ficha_base['expm'] / 2 )
+        exibir_ficha_jogador()
+
+def upar():
+    ficha_base['dmg'] += 1
+    ficha_base['hpm'] += 10
+    ficha_base['hp'] = ficha_base['hpm']
+    ficha_base['spd'] += 1
 
 def acampar(): #acampa, restaura metade da vida
     titulo('Acampar')
@@ -57,9 +76,10 @@ def acampar(): #acampa, restaura metade da vida
 
 def explorar(): #explora, através de dado randomiza a chance de entrar em combate, achar um item ou encontrar um npc
     titulo('Explorar')
-    if dados() >= 12:
+    if dados() >= 15:
         ganhar_item()
         print(f'Você encontrou um item')
+        sleep(1.5)
     else:
         combate()
 
@@ -96,6 +116,7 @@ def lutando(ficha_mob): #combate
             turno_jogador(ficha_mob)
             if ficha_mob['hp'] <= 0:
                 titulo('Fim da Luta, o jogador venceu')
+                ganhar_exp(ficha_mob)
                 break
             turno_mob(ficha_mob)
             if ficha_base['hp'] <= 0:
@@ -109,11 +130,29 @@ def lutando(ficha_mob): #combate
             turno_jogador(ficha_mob)
             if ficha_mob['hp'] <= 0:
                 titulo('Fim da Luta, o jogador venceu')
+                ganhar_exp(ficha_mob)
                 break
 
 
+def abrir_bolsa():
+    titulo('Inventário')
+    if len(bolsa) == 0:
+        print('Inventário Vazio'.center(40))
+    else:
+        for i in range(0, len(bolsa)):
+            for key in bolsa[i].keys():
+                for value in bolsa[i].values():
+                    print(f'{i + 1} - {key} : {value}')
+    linha()
+
+
+def fugir(mob_atual):
+    if dados() >= 14:
+        return True
+
+
 def combate(): #turno do jogador
-    mob_atual = gerar_mob()
+    mob_atual = gerar_mob((ficha_base['lv'] + 3), (ficha_base['lv'] + 10))
     exibir_ficha_mob(mob_atual)
     while True:
         try:
@@ -127,14 +166,27 @@ def combate(): #turno do jogador
 Escolha uma das Alternativas: """)) - 1]
             if num_alternativas == 'lutar':
                 lutando(mob_atual)
-            break
+                break
+            elif num_alternativas == 'usar item':
+                abrir_bolsa()
+            elif num_alternativas == 'fugir':
+                if fugir(mob_atual):
+                    linha()
+                    print('\033[32mVocê conseguiu fugir do monstro!\033[m'.center(40))
+                    break
+                else:
+                    linha()
+                    print('\033[31mVocê não conseguiu fugir do monstro!\033[m'.center(40))
+                    lutando(mob_atual)
+                    break
+            
         except ValueError:
             print('\033[31mEscolha Inválida!\033[m')
 
 
 bolsa = list()
-
 ficha_base = {'nome': '', 'raça': '', 'lv': 1, 'hp': 100, 'hpm': 100, 'dmg': 10, 'spd': 5, 'exp': 0, 'expm': 100}
+
 raca_nomes = ['humano', 'orc', 'elfo']
 raca_atributos = {'humano': {'hpm': 20, 'dmg': 0, 'spd': 0},
                   'orc': {'hpm': 0, 'dmg': 5, 'spd': 0},
@@ -155,7 +207,7 @@ while True:
                                         
 Escolha uma das raças: """)) - 1]
         break
-    except ValueError:
+    except:
         print(f'\033[31mEscolha Inválida!\033[m')
 
 ficha_base['raça'] = num_raca
@@ -172,6 +224,7 @@ while not ficha_base['hp'] <= 0:
     rotas = ['acampar', 'explorar']
     while True:
         try:
+            linha()
             num_rotas = rotas[int(input("""Rotas Disponiveis:\033[33m
                                         
     1) acampar
@@ -180,7 +233,7 @@ while not ficha_base['hp'] <= 0:
 Escolha uma das Alternativas: """)) - 1]
         
             break
-        except ValueError:
+        except:
             print('\033[31mEscolha Inválida!\033[m')
 
     for rodada in range(0, 3):
@@ -191,7 +244,8 @@ Escolha uma das Alternativas: """)) - 1]
                 break
         else:
             explorar()
-            if ficha_base['hp'] == 0:
+            if ficha_base['hp'] <= 0:
+                rodada = 2
                 break
     rodada += 1
 
