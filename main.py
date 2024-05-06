@@ -16,7 +16,7 @@ def titulo(msg):
 
 
 def ganhar_item(): #gera um item dentro da lista de itens
-    itens = [{'Banana': 'Restaura 20 de Vida'}, {'Maça': 'Restaura 40 de Vida'}, {'Espinafre': 'Aumenta 1 de Força'}]
+    itens = [{'Banana': ['Restaura a vida', '20']}, {'Maça': ['Restaura a vida', '40']}, {'Espinafre': ['Restaura a vida', '50']}]
     bolsa.append(itens[randint(0, 2)])
     return bolsa[-1]
 
@@ -85,10 +85,10 @@ def explorar(): #explora, através de dado randomiza a chance de entrar em comba
     sleep(1.5)
     dado = dados()
     titulo(f'dado caiu em {dado}')
-    if dado >= 15:
-        ganhar_item()
-        print(f'Você encontrou um item')
-        sleep(1.5)
+    if dado >= 10:
+        for keys in ganhar_item().keys():
+            print(f'Você encontrou um(a) \033[34m{keys}\033[m'.center(48))
+            sleep(1.5)
     else:
         sleep(0.5)
         combate()
@@ -159,12 +159,28 @@ def abrir_bolsa():
     titulo('Inventário')
     if len(bolsa) == 0:
         print('Inventário Vazio'.center(40))
+        linha()
     else:
-        for i in range(0, len(bolsa)):
-            for key in bolsa[i].keys():
-                for value in bolsa[i].values():
-                    print(f'{i + 1} - {key} : {value}')
-    linha()
+        while True:
+            try:
+                for i in range(0, len(bolsa)):
+                    for key in bolsa[i].keys():
+                        for value in bolsa[i].values():
+                            print(f'{i + 1} - \033[34m{key}\033[m : {value[0]} = {value[1]} hp')
+                usar_item = bolsa[int(input('\nEscolha o Item que será Utilizado: ')) - 1]
+                linha()
+                for keys in usar_item.keys():
+                    print(f'Você Consumiu um(a) \033[34m{keys}\033[m'.center(48))
+                    linha()
+                    vida_recuperda = usar_item[key][1]
+                    print(f'\033[32mVocê Recuperou {vida_recuperda} de Vida\033[m'.center(48))
+                    linha()
+                break
+            except:
+                erro_msg()
+    ficha_base['hp'] += int(vida_recuperda)
+    if ficha_base['hp'] > ficha_base['hpm']:
+        ficha_base['hp'] = ficha_base['hpm']
 
 
 def fugir(mob_atual):
@@ -212,7 +228,7 @@ def combate(): #turno do jogador
 
 
 bolsa = list()
-ficha_base = {'nome': '', 'raça': '', 'lv': 1, 'hp': 10, 'hpm': 100, 'dmg': 10, 'spd': 5, 'exp': 0, 'expm': 100}
+ficha_base = {'nome': '', 'raça': '', 'lv': 1, 'hp': 100, 'hpm': 100, 'dmg': 10, 'spd': 5, 'exp': 0, 'expm': 100}
 
 raca_nomes = ['humano', 'orc', 'elfo']
 raca_atributos = {'humano': {'hpm': 20, 'dmg': 0, 'spd': 0},
