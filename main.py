@@ -39,7 +39,7 @@ def exibir_ficha_mob(mob_atual): #exibe a ficha do mob
     for keys in mob_atual.keys():
         print(f'\033[34m{keys}:\033[m {mob_atual[keys]}')
     linha()
-    sleep(2)
+    sleep(1.5)
 
 
 def gerar_mob(lv_base=3, lv_max=10): #gera um mob
@@ -74,9 +74,9 @@ def acampar(): #acampa, restaura metade da vida
     if ficha_base['hp'] > ficha_base['hpm']:
         ficha_base['hp'] = ficha_base['hpm']
     print(f'\033[32mVocê recuperou {vida_curada} de vida\033[m')
-    sleep(2)
+    sleep(1.5)
     exibir_ficha_jogador()
-    sleep(2)
+    sleep(1.5)
 
 
 def explorar(): #explora, através de dado randomiza a chance de entrar em combate, achar um item ou encontrar um npc
@@ -85,7 +85,7 @@ def explorar(): #explora, através de dado randomiza a chance de entrar em comba
     sleep(1.5)
     dado = dados()
     titulo(f'dado caiu em {dado}')
-    if dado >= 10:
+    if dado >= 15:
         for keys in ganhar_item().keys():
             print(f'Você encontrou um(a) \033[34m{keys}\033[m'.center(48))
             sleep(1.5)
@@ -100,7 +100,7 @@ def turno_jogador(ficha_mob): #executa o ataque do jogador
     print(f'\033[33m{ficha_base["dmg"]} de dano causado\033[m')
     ficha_mob.update({'hp': int(ficha_mob['hp']) - ficha_base['dmg']})
     print(f'{ficha_mob["hp"]} de Vida Restante do Mob')
-    sleep(1.5)
+    sleep(0.5)
 
 
 def turno_mob(ficha_mob): #executa o ataque do mob
@@ -109,7 +109,7 @@ def turno_mob(ficha_mob): #executa o ataque do mob
     print(f'\033[31m{ficha_mob["dmg"]} de dano causado\033[m')
     ficha_base.update({'hp': int(ficha_base['hp']) - ficha_mob['dmg']})
     print(f'{ficha_base["hp"]} de vida restante do jogador')
-    sleep(1.5)
+    sleep(0.5)
     
 
 def iniciativa(ficha_mob): #com base na veolcidade, define quem começa atacando
@@ -193,13 +193,11 @@ def escolha_combate(mob_atual):
             break
         try:
             alternativas = ['lutar', 'usar item', 'fugir']
-            num_alternativas = alternativas[int(input("""Alternativas Dispopniveis:\033[33m
-                                                      
-        1) Lutar
-        2) Usar Item
-        3) Fugir\033[m
-
-Escolha uma das Alternativas: """)) - 1]
+            print('\033[35mTurno do Jogador\033[m'.center(48))
+            linha()
+            for i in range(0, len(alternativas)):
+                print(f'\033[33m{i + 1}) {alternativas[i]}\033[m')
+            num_alternativas = alternativas[int(input('\nEscolha uma das Alternativas:')) - 1]
             if num_alternativas == 'lutar':
                 lutando(mob_atual)
                 break
